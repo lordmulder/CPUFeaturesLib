@@ -22,11 +22,13 @@
 #include "CPUFeaturesPlugin.h"
 #include <CPUFeatures.h>
 
-HANDLE g_hInstance;
-bool g_bCallbackRegistred;
-bool g_bVerbose;
+static HANDLE g_hInstance;
+static bool g_bCallbackRegistred;
+static bool g_bVerbose;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+static RTL_CRITICAL_SECTION g_mutex;
 
 BOOL WINAPI DllMain(HANDLE hInst, ULONG ul_reason_for_call, LPVOID lpReserved)
 {
@@ -35,7 +37,11 @@ BOOL WINAPI DllMain(HANDLE hInst, ULONG ul_reason_for_call, LPVOID lpReserved)
 		g_hInstance = hInst;
 		g_bCallbackRegistred = false;
 		g_bVerbose = false;
-		//srand(static_cast<unsigned int>(time(NULL)));
+		InitializeCriticalSection(&g_mutex);
+	}
+	else if(ul_reason_for_call == DLL_PROCESS_DETACH)
+	{
+		DeleteCriticalSection(&g_mutex);
 	}
 	return TRUE;
 }
@@ -54,6 +60,24 @@ static UINT_PTR PluginCallback(enum NSPIM msg)
 
 	return 0;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+static UINT32_T s_features = 0;
+static bool s_features_initialized = false;
+
+#define INIT_CPU_FEATURES(VAR) do \
+{ \
+	EnterCriticalSection(&g_mutex); \
+	if(!s_features_initialized) \
+	{ \
+		s_features = cpulib_cpu_detect(); \
+		s_features_initialized = true; \
+	} \
+	VAR = s_features; \
+	LeaveCriticalSection(&g_mutex); \
+} \
+while(0)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -120,7 +144,9 @@ NSISFUNC(GetCPUFlags)
 	REGSITER_CALLBACK(g_hInstance);
 	MAKESTR(str, g_stringsize);
 
-	UINT32_T features = cpulib_cpu_detect();
+	UINT32_T features;
+	INIT_CPU_FEATURES(features);
+
 	_sntprintf(str, g_stringsize, _T("0x%08X"), features);
 
 	pushstring(str);
@@ -149,7 +175,8 @@ NSISFUNC(GetCPUFeatures)
 	REGSITER_CALLBACK(g_hInstance);
 	MAKESTR(str, g_stringsize);
 
-	UINT32_T features = cpulib_cpu_detect();
+	UINT32_T features;
+	INIT_CPU_FEATURES(features);
 
 	for(size_t i = 0; s_cpu_features[i].flag; i++)
 	{
@@ -187,7 +214,9 @@ NSISFUNC(CheckCPUFeature)
 		return;
 	}
 
-	UINT32_T features = cpulib_cpu_detect();
+	UINT32_T features;
+	INIT_CPU_FEATURES(features);
+
 	pushstring((features & flag) ? _T("yes") : _T("no"));
 
 	delete [] str;
@@ -201,7 +230,8 @@ NSISFUNC(GetCPUVendor)
 	REGSITER_CALLBACK(g_hInstance);
 	MAKESTR(str, g_stringsize);
 
-	UINT32_T features = cpulib_cpu_detect();
+	UINT32_T features;
+	INIT_CPU_FEATURES(features);
 
 	if(features & CPULIB_CPU_VENDOR_INTEL)
 	{

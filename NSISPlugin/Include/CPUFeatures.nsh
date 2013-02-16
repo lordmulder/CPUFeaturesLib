@@ -10,6 +10,7 @@
 !define CPUFeatures.GetVendor    '!insertmacro _CPUFeatures_GetVendor'    #Get CPU vendor (e.g. "Intel" or "AMD"), returns a string
 !define CPUFeatures.CheckFeature '!insertmacro _CPUFeatures_CheckFeature' #Check for a specific feature (e.g. "MMX1"), returns "yes" or "no" or "error"
 
+
 ### SUPPORTED CPU FEATURE FLAGS ###
 
 # MMX1         -> MMX supported

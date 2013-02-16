@@ -22,6 +22,7 @@
 #ifndef __STDUTILS_H__
 #define __STDUTILS_H__
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include "nsis\pluginapi.h"
 #include "msvc_utils.h"
