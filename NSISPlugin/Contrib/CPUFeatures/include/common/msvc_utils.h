@@ -31,6 +31,8 @@ int _snwprintf(wchar_t *buffer, size_t count, const wchar_t *format, ...);
 int _snprintf(char *buffer, size_t count, const char *format, ...);
 int sscanf(const char *input, const char * format, ...);
 int swscanf(const wchar_t *input, const wchar_t * format, ...);
+int _stricmp(const char *string1, const char *string2);
+int _wcsicmp(const wchar_t *string1, const wchar_t *string2);
 
 uintptr_t _beginthreadex( 
 	void *security,
