@@ -11,13 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\cpu.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\cpu.h" />
-  </ItemGroup>
-  <ItemGroup>
     <Object Include="asm\cpu-a.obj" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\CPUFeatures.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\CPUFeatures.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9A706F23-C2EB-4B9F-B604-8B7F086A7E99}</ProjectGuid>
@@ -73,6 +73,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

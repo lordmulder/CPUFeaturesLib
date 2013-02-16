@@ -18,18 +18,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\cpu.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <Object Include="asm\cpu-a.obj">
+      <Filter>Assembler Files</Filter>
+    </Object>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\cpu.h">
+    <ClInclude Include="include\CPUFeatures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Object Include="asm\cpu-a.obj">
-      <Filter>Assembler Files</Filter>
-    </Object>
+    <ClCompile Include="src\CPUFeatures.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

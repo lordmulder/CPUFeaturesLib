@@ -25,7 +25,7 @@
  * For more information, contact us at licensing@x264.com.
  *****************************************************************************/
 
-#include "cpu.h"
+#include "CPUFeatures.h"
 
 #include <string.h>
 #include <assert.h>

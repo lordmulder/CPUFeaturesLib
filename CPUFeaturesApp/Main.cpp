@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <tchar.h>
 
-#include "../CPUFeaturesLib/src/cpu.h"
+#include "CPUFeatures.h"
 
 #define CHECK_FEATURE(WHICH) do \
 { \
