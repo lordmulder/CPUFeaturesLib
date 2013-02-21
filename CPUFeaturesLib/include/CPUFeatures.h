@@ -70,12 +70,19 @@ typedef unsigned int UINT32_T;
 #define CPULIB_CPU_BMI1            0x8000000  /* BMI1 */
 #define CPULIB_CPU_BMI2           0x10000000  /* BMI2 */
 #define CPULIB_CPU_TBM            0x20000000  /* AMD TBM */
-#define CPULIB_CPU_VENDOR_INTEL   0x40000000  /* CPU vendir is Intel */
-#define CPULIB_CPU_VENDOR_AMD     0x80000000  /* CPU vendor is AMD */
+#define CPULIB_CPU_3DNOW          0x40000000  /* 3DNow! */
+#define CPULIB_CPU_3DNOWEX        0x80000000  /* 3DNow!Ex aka 3DNow!2 */
+
+/* CPU vendor flags
+ */
+#define CPULIB_VENDOR_OTHER       0x00000000  /* Unknown */
+#define CPULIB_VENDOR_INTEL       0x00000001  /* Intel */
+#define CPULIB_VENDOR_AMD         0x00000002  /* AMD */
 
 /* Functions
  */
-UINT32_T cpulib_cpu_detect( void );
+UINT32_T cpulib_cpu_detect( UINT32_T *vendorflag );
+int cpulib_num_processors( void );
 
 #ifdef __cplusplus
 }

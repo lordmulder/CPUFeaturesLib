@@ -30,6 +30,13 @@
 #include <string.h>
 #include <assert.h>
 
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+
+#ifdef _WIN64
+#define ARCH_X86_64 1
+#endif
+
 #define cpulib_log __noop
 #define cpulib_cpu_mask_misalign_sse __noop
 #define CPULIB_LOG_WARNING 1
@@ -38,13 +45,16 @@ int cpulib_cpu_cpuid_test( void );
 void cpulib_cpu_cpuid( UINT32_T op, UINT32_T *eax, UINT32_T *ebx, UINT32_T *ecx, UINT32_T *edx );
 void cpulib_cpu_xgetbv( UINT32_T op, UINT32_T *eax, UINT32_T *edx );
 
-UINT32_T cpulib_cpu_detect( void )
+UINT32_T cpulib_cpu_detect( UINT32_T *vendorflag )
 {
     UINT32_T cpu = 0;
     UINT32_T eax, ebx, ecx, edx;
     UINT32_T vendor[4] = {0};
     UINT32_T max_extended_cap;
     int cache;
+
+    if( vendorflag )
+        *vendorflag = CPULIB_VENDOR_OTHER;
 
 #if !ARCH_X86_64
     if( !cpulib_cpu_cpuid_test() )
@@ -106,7 +116,8 @@ UINT32_T cpulib_cpu_detect( void )
 
     if( !strcmp((char*)vendor, "AuthenticAMD") )
     {
-        cpu |= CPULIB_CPU_VENDOR_AMD;
+        if( vendorflag )
+            *vendorflag = CPULIB_VENDOR_AMD;
     }
 
     if( !strcmp((char*)vendor, "AuthenticAMD") && max_extended_cap >= 0x80000001 )
@@ -144,12 +155,21 @@ UINT32_T cpulib_cpu_detect( void )
             if( ecx&0x00200000 )
                 cpu |= CPULIB_CPU_TBM;
         }
+        if( edx&0x80000000 )
+        {
+            cpu |= CPULIB_CPU_3DNOW;
+        }
+        if( edx&0x40000000 )
+        {
+                cpu |= CPULIB_CPU_3DNOWEX;
+        }
     }
 
     if( !strcmp((char*)vendor, "GenuineIntel") )
     {
         int model, family;
-        cpu |= CPULIB_CPU_VENDOR_INTEL;
+        if( vendorflag )
+            *vendorflag = CPULIB_VENDOR_INTEL;
         cpulib_cpu_cpuid( 1, &eax, &ebx, &ecx, &edx );
         family = ((eax>>8)&0xf) + ((eax>>20)&0xff);
         model  = ((eax>>4)&0xf) + ((eax>>12)&0xf0);
@@ -269,3 +289,29 @@ void __intel_cpu_indicator_init( void )
 void cpulib_intel_cpu_indicator_init( void )
 {}
 #endif
+
+int cpulib_num_processors()
+{
+    DWORD_PTR system_cpus, bit, process_cpus = 0;
+    int cpus = 0;
+
+    /* GetProcessAffinityMask returns affinities of 0 when the process has threads in multiple processor groups.
+     * On platforms that support processor grouping, use GetThreadGroupAffinity to get the current thread's affinity instead. */
+#if ARCH_X86_64
+    /* find function pointers to API functions specific to x86_64 platforms, if they exist */
+    HANDLE kernel_dll = GetModuleHandle( TEXT( "kernel32.dll" ) );
+    BOOL (*get_thread_affinity)( HANDLE thread, x264_group_affinity_t *group_affinity ) = (void*)GetProcAddress( kernel_dll, "GetThreadGroupAffinity" );
+    if( get_thread_affinity )
+    {
+        /* running on a platform that supports >64 logical cpus */
+        x264_group_affinity_t thread_affinity;
+        if( get_thread_affinity( GetCurrentThread(), &thread_affinity ) )
+            process_cpus = thread_affinity.mask;
+    }
+#endif
+    if( !process_cpus )
+        GetProcessAffinityMask( GetCurrentProcess(), &process_cpus, &system_cpus );
+    for( bit = 1; bit; bit <<= 1 )
+        cpus += !!(process_cpus & bit);
+    return cpus ? cpus : 1;
+}

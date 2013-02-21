@@ -17,10 +17,33 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	fprintf(stderr, "CPUFeatureLib Test App [%s]\n\n", __DATE__);
 	
-	UINT32_T features = cpulib_cpu_detect();
-	fprintf(stderr, "CPU Features: 0x%08X\n\n", features);
+	/* Query CPU information */
+	UINT32_T vendor_flags;
+	UINT32_T features = cpulib_cpu_detect(&vendor_flags);
+	int num_processors = cpulib_num_processors();
+	
+	/* Print basic information */
+	fprintf(stderr, "CPU Count:    %d\n", num_processors);
+	fprintf(stderr, "CPU Features: 0x%08X\n", features);
+	fprintf(stderr, "CPU Vendor:   %u", vendor_flags);
+	
+	/* Print the vendor name */
+	switch(vendor_flags)
+	{
+	case CPULIB_VENDOR_INTEL:
+		fprintf(stderr, " (Intel)\n");
+		break;
+	case CPULIB_VENDOR_AMD:
+		fprintf(stderr, " (AMD)\n");
+		break;
+	default:
+		fprintf(stderr, " (Unknown)\n");
+		break;
+	}
+	
 
-	fprintf(stderr, "[Details]\n", features);
+	/* Print detailed feature information */
+	fprintf(stderr, "\n[Details]\n");
 	CHECK_FEATURE(CPULIB_CPU_CACHELINE_32);
 	CHECK_FEATURE(CPULIB_CPU_CACHELINE_64);
 	CHECK_FEATURE(CPULIB_CPU_ALTIVEC);
@@ -51,8 +74,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	CHECK_FEATURE(CPULIB_CPU_BMI1);
 	CHECK_FEATURE(CPULIB_CPU_BMI2);
 	CHECK_FEATURE(CPULIB_CPU_TBM);
-	CHECK_FEATURE(CPULIB_CPU_VENDOR_INTEL);
-	CHECK_FEATURE(CPULIB_CPU_VENDOR_AMD);
+	CHECK_FEATURE(CPULIB_CPU_3DNOW);
+	CHECK_FEATURE(CPULIB_CPU_3DNOWEX);
 
 	printf("\n");
 	return 0;

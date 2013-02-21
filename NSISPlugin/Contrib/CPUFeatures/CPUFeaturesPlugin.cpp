@@ -64,17 +64,18 @@ static UINT_PTR PluginCallback(enum NSPIM msg)
 ///////////////////////////////////////////////////////////////////////////////
 
 static UINT32_T s_features = 0;
+static UINT32_T s_vendor = 0;
 static bool s_features_initialized = false;
 
-#define INIT_CPU_FEATURES(VAR) do \
+#define INIT_CPU_FEATURES(X, Y) do \
 { \
 	EnterCriticalSection(&g_mutex); \
 	if(!s_features_initialized) \
 	{ \
-		s_features = cpulib_cpu_detect(); \
+		s_features = cpulib_cpu_detect(&s_vendor); \
 		s_features_initialized = true; \
 	} \
-	VAR = s_features; \
+	X = s_features; Y = s_vendor; \
 	LeaveCriticalSection(&g_mutex); \
 } \
 while(0)
@@ -109,6 +110,8 @@ s_cpu_features[] =
 	{CPULIB_CPU_FMA4, _T("FMA4")},
 	{CPULIB_CPU_AVX2, _T("AVX2")},
 	{CPULIB_CPU_FMA3, _T("FMA3")},
+	{CPULIB_CPU_3DNOW, _T("3DNOW")},
+	{CPULIB_CPU_3DNOWEX, _T("3DNOW_EX")},
 	{0x00000000, NULL}
 };
 
@@ -144,8 +147,8 @@ NSISFUNC(GetCPUFlags)
 	REGSITER_CALLBACK(g_hInstance);
 	MAKESTR(str, g_stringsize);
 
-	UINT32_T features;
-	INIT_CPU_FEATURES(features);
+	UINT32_T features, vendor;
+	INIT_CPU_FEATURES(features, vendor);
 
 	_sntprintf(str, g_stringsize, _T("0x%08X"), features);
 
@@ -175,8 +178,8 @@ NSISFUNC(GetCPUFeatures)
 	REGSITER_CALLBACK(g_hInstance);
 	MAKESTR(str, g_stringsize);
 
-	UINT32_T features;
-	INIT_CPU_FEATURES(features);
+	UINT32_T features, vendor;
+	INIT_CPU_FEATURES(features, vendor);
 
 	for(size_t i = 0; s_cpu_features[i].flag; i++)
 	{
@@ -214,8 +217,8 @@ NSISFUNC(CheckCPUFeature)
 		return;
 	}
 
-	UINT32_T features;
-	INIT_CPU_FEATURES(features);
+	UINT32_T features, vendor;
+	INIT_CPU_FEATURES(features, vendor);
 
 	pushstring((features & flag) ? _T("yes") : _T("no"));
 
@@ -230,14 +233,14 @@ NSISFUNC(GetCPUVendor)
 	REGSITER_CALLBACK(g_hInstance);
 	MAKESTR(str, g_stringsize);
 
-	UINT32_T features;
-	INIT_CPU_FEATURES(features);
+	UINT32_T features, vendor;
+	INIT_CPU_FEATURES(features, vendor);
 
-	if(features & CPULIB_CPU_VENDOR_INTEL)
+	if(vendor == CPULIB_VENDOR_INTEL)
 	{
 		_tcscpy(str, _T("Intel"));
 	}
-	else if(features & CPULIB_CPU_VENDOR_AMD)
+	else if(vendor == CPULIB_VENDOR_AMD)
 	{
 		_tcscpy(str, _T("AMD"));
 	}
@@ -249,3 +252,25 @@ NSISFUNC(GetCPUVendor)
 	pushstring(str);
 	delete [] str;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+NSISFUNC(GetCPUCount)
+{
+	EXDLL_INIT();
+	REGSITER_CALLBACK(g_hInstance);
+
+	int num_processors = cpulib_num_processors();
+
+	if(num_processors > 0)
+	{
+		pushint(num_processors);
+		return;
+	}
+
+	pushstring(_T("error"));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*eof*/
