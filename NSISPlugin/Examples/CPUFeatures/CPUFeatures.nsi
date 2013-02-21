@@ -42,7 +42,7 @@ Section
 	DetailPrint "Has MMX: $0"
 
 	${CPUFeatures.CheckFeature} "MMX2" $0
-	DetailPrint "Has MMX: $0"
+	DetailPrint "Has MMX2: $0"
 
 	${CPUFeatures.CheckFeature} "SSE1" $0
 	DetailPrint "Has SSE: $0"
@@ -60,7 +60,7 @@ Section
 	DetailPrint "Has SSE4.2: $0"
 
 	${CPUFeatures.CheckFeature} "AVX1" $0
-	DetailPrint "Has AVX1: $0"
+	DetailPrint "Has AVX: $0"
 
 	${CPUFeatures.CheckFeature} "AVX2" $0
 	DetailPrint "Has AVX2: $0"
