@@ -227,6 +227,56 @@ NSISFUNC(CheckCPUFeature)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+NSISFUNC(CheckAllCPUFeatures)
+{
+	EXDLL_INIT();
+	REGSITER_CALLBACK(g_hInstance);
+	MAKESTR(str, g_stringsize);
+
+	if(popstring(str) != 0)
+	{
+		pushstring(_T("error"));
+		delete [] str;
+		return;
+	}
+
+	UINT32_T features, vendor;
+	INIT_CPU_FEATURES(features, vendor);
+
+	static const TCHAR *DELIM = _T(" ,");
+	TCHAR *token = _tcstok(str, DELIM);
+
+	if(token == NULL)
+	{
+		pushstring(_T("error"));
+		delete [] str;
+		return;
+	}
+
+	bool bHaveAll = true;
+
+	while(token)
+	{
+		UINT32_T flag = name2flag(token);
+
+		if(flag == 0)
+		{
+			pushstring(_T("error"));
+			delete [] str;
+			return;
+		}
+		
+		bHaveAll = bHaveAll && (features & flag);
+		token = _tcstok(NULL, DELIM);
+	}
+
+	pushstring(bHaveAll ? _T("yes") : _T("no"));
+
+	delete [] str;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 NSISFUNC(GetCPUVendor)
 {
 	EXDLL_INIT();

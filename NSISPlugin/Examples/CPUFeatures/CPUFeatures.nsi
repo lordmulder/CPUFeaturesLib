@@ -17,7 +17,7 @@ BrandingText "Built on ${BUILD_DATE}"
 RequestExecutionLevel user
 ShowInstDetails show
 
-; Get CPU flags (this is for debugging!)
+; Get CPU flags (this is for debugging!) + CPU count
 Section
 	${CPUFeatures.GetFlags} $0
 	DetailPrint "CPU Flags: $0"
@@ -80,4 +80,24 @@ Section
 	; Next call is supposed to fail!
 	${CPUFeatures.CheckFeature} "SSE7" $0
 	DetailPrint "Has SSE7: $0"
+SectionEnd
+
+; Check multiple features at once
+; Returns only "yes", if *all* features are supported
+Section
+	${CPUFeatures.CheckAllFeatures} "MMX1,SSE1" $0
+	DetailPrint "Has MMX+SSE: $0"
+
+	${CPUFeatures.CheckAllFeatures} "MMX1,3DNOW" $0
+	DetailPrint "Has MMX1+3DNOW: $0"
+
+	${CPUFeatures.CheckAllFeatures} "MMX1,SSE1,SSE2,SSE3,SSSE3" $0
+	DetailPrint "Has MMX+SSE+SSE2+SSE3+SSSE3: $0"
+
+	${CPUFeatures.CheckAllFeatures} "MMX1,SSE1,SSE2,SSE3,SSSE3,SSE4" $0
+	DetailPrint "Has MMX+SSE+SSE2+SSE3+SSSE3+SSE4: $0"
+
+	; Next call is supposed to fail!
+	${CPUFeatures.CheckAllFeatures} "MMX1,SSE1,SSE2,SSE3,SSSE3,SSE7" $0
+	DetailPrint "Has MMX+SSE+SSE2+SSE3+SSSE3+SSE7: $0"
 SectionEnd

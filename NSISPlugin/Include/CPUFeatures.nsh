@@ -5,11 +5,12 @@
 
 ### FUNCTION DECLARTIONS ###
 
-!define CPUFeatures.GetFlags     '!insertmacro _CPUFeatures_GetFlags'     #Get CPU Flags as a single Hex value (for debugging)
-!define CPUFeatures.GetFeatures  '!insertmacro _CPUFeatures_GetFeatures'  #Get all supported CPU Features, returns a single string (comma-separated list)
-!define CPUFeatures.GetVendor    '!insertmacro _CPUFeatures_GetVendor'    #Get CPU vendor (e.g. "Intel" or "AMD"), returns a string
-!define CPUFeatures.CheckFeature '!insertmacro _CPUFeatures_CheckFeature' #Check for a specific feature (e.g. "MMX1"), returns "yes" or "no" or "error"
-!define CPUFeatures.GetCount     '!insertmacro _CPUFeatures_GetCount    ' #Get the number of CPU's (or more precise: CPU "cores")
+!define CPUFeatures.GetFlags         '!insertmacro _CPUFeatures_GetFlags'         #Get CPU Flags as a single Hex value (for debugging)
+!define CPUFeatures.GetFeatures      '!insertmacro _CPUFeatures_GetFeatures'      #Get all supported CPU Features, returns a single string (comma-separated list)
+!define CPUFeatures.GetVendor        '!insertmacro _CPUFeatures_GetVendor'        #Get CPU vendor (e.g. "Intel" or "AMD"), returns a string
+!define CPUFeatures.CheckFeature     '!insertmacro _CPUFeatures_CheckFeature'     #Check for a specific feature (e.g. "MMX1"), returns "yes" or "no" or "error"
+!define CPUFeatures.CheckAllFeatures '!insertmacro _CPUFeatures_CheckAllFeatures' #Check for multiple features (comma-separated list), returns "yes" or "no" or "error"
+!define CPUFeatures.GetCount         '!insertmacro _CPUFeatures_GetCount'         #Get the number of CPU's (or more precise: CPU "cores")
 
 
 ### SUPPORTED CPU FEATURE FLAGS ###
@@ -59,6 +60,12 @@
 !macro _CPUFeatures_CheckFeature feature out
 	push `${feature}`
 	CPUFeatures::CheckCPUFeature /NOUNLOAD
+	pop ${out}
+!macroend
+
+!macro _CPUFeatures_CheckAllFeatures feature_list out
+	push `${feature_list}`
+	CPUFeatures::CheckAllCPUFeatures /NOUNLOAD
 	pop ${out}
 !macroend
 
