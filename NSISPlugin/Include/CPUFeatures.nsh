@@ -5,7 +5,7 @@
 
 ### FUNCTION DECLARTIONS ###
 
-!define CPUFeatures.GetFlags         '!insertmacro _CPUFeatures_GetFlags'         #Get CPU Flags as a single Hex value (for debugging)
+!define CPUFeatures.GetFlags         '!insertmacro _CPUFeatures_GetFlags'         #Get CPU Flags as a single Hex value (for debugging only!)
 !define CPUFeatures.GetFeatures      '!insertmacro _CPUFeatures_GetFeatures'      #Get all supported CPU Features, returns a single string (comma-separated list)
 !define CPUFeatures.GetVendor        '!insertmacro _CPUFeatures_GetVendor'        #Get CPU vendor (e.g. "Intel" or "AMD"), returns a string
 !define CPUFeatures.CheckFeature     '!insertmacro _CPUFeatures_CheckFeature'     #Check for a specific feature (e.g. "MMX1"), returns "yes" or "no" or "error"
@@ -73,3 +73,32 @@
 	CPUFeatures::GetCPUCount /NOUNLOAD
 	pop ${out}
 !macroend
+
+
+### LOGIC_LIB SUPPORT ###
+
+!ifdef LOGICLIB
+	; ${If} ${CPUSupports} <flag> ... ${EndIf}
+	!macro _CPUSupports _a _b _t _f
+		!insertmacro _LOGICLIB_TEMP
+		push `${_b}`
+		CPUFeatures::CheckCPUFeature /NOUNLOAD
+		pop $_LOGICLIB_TEMP
+		#StrCmp $_LOGICLIB_TEMP `error` 0 +2
+		#MessageBox MB_ICONSTOP "CPUSupports_ Invalid CPU flags specified!"
+		!insertmacro _== $_LOGICLIB_TEMP `yes` `${_t}` `${_f}`
+	!macroend
+	!define CPUSupports `"" CPUSupports`
+
+	; ${If} ${CPUSupportsAll} <flag_list> ... ${EndIf}
+	!macro _CPUSupportsAll _a _b _t _f
+		!insertmacro _LOGICLIB_TEMP
+		push `${_b}`
+		CPUFeatures::CheckAllCPUFeatures /NOUNLOAD
+		pop $_LOGICLIB_TEMP
+		#StrCmp $_LOGICLIB_TEMP `error` 0 +2
+		#MessageBox MB_ICONSTOP "CPUSupportsAll: Invalid CPU flags specified!"
+		!insertmacro _== $_LOGICLIB_TEMP `yes` `${_t}` `${_f}`
+	!macroend
+	!define CPUSupportsAll `"" CPUSupportsAll`
+!endif
